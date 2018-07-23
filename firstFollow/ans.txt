@@ -1,0 +1,117 @@
+nullable(Z):	false
+nullable(Y):	true
+nullable(X):	true
+
+FIRST(Z):	d c a 
+FIRST(Y):	c 
+FIRST(X):	c a 
+
+FOLLOW(Z):	
+FOLLOW(Y):	d c a 
+FOLLOW(X):	c d a 
+--------------------------------
+
+nullable(S'):	false
+nullable(L):	false
+nullable(S):	false
+nullable(E):	false
+nullable(E'):	true
+nullable(T):	false
+nullable(T'):	true
+nullable(F):	false
+
+FIRST(S'):	id print 
+FIRST(L):	id print 
+FIRST(S):	id print 
+FIRST(E):	id num ( 
+FIRST(E'):	+ - 
+FIRST(T):	id num ( 
+FIRST(T'):	* / 
+FIRST(F):	id num ( 
+
+FOLLOW(S'):	
+FOLLOW(L):	$ 
+FOLLOW(S):	; $ 
+FOLLOW(E):	; $ ) 
+FOLLOW(E'):	; $ ) 
+FOLLOW(T):	+ - ; $ ) 
+FOLLOW(T'):	+ - ; $ ) 
+FOLLOW(F):	* / + - ; $ ) 
+--------------------------------
+
+nullable(S'):	false
+nullable(L):	false
+nullable(L'):	true
+nullable(S):	false
+nullable(E):	false
+nullable(E'):	true
+nullable(T):	false
+nullable(T'):	true
+nullable(F):	false
+
+FIRST(S'):	id print 
+FIRST(L):	id print 
+FIRST(L'):	; 
+FIRST(S):	id print 
+FIRST(E):	id num ( 
+FIRST(E'):	+ - 
+FIRST(T):	id num ( 
+FIRST(T'):	* / 
+FIRST(F):	id num ( 
+
+FOLLOW(S'):	
+FOLLOW(L):	$ 
+FOLLOW(L'):	$ 
+FOLLOW(S):	$ ; 
+FOLLOW(E):	) $ ; 
+FOLLOW(E'):	) $ ; 
+FOLLOW(T):	+ - ) $ ; 
+FOLLOW(T'):	+ - ) $ ; 
+FOLLOW(F):	* / + - ) $ ; 
+--------------------------------
+
+nullable(S):	false
+nullable(E):	false
+nullable(T):	false
+nullable(F):	false
+
+FIRST(S):	- num 
+FIRST(E):	- num 
+FIRST(T):	- num 
+FIRST(F):	- num 
+
+FOLLOW(S):	
+FOLLOW(E):	$ 
+FOLLOW(T):	$ + 
+FOLLOW(F):	+ $ 
+--------------------------------
+
+nullable(S):	false
+nullable(X):	true
+nullable(E):	false
+nullable(E'):	true
+nullable(T):	false
+
+FIRST(S):	id if 
+FIRST(X):	else 
+FIRST(E):	num 
+FIRST(E'):	+ 
+FIRST(T):	num 
+
+FOLLOW(S):	else 
+FOLLOW(X):	else 
+FOLLOW(E):	then else 
+FOLLOW(E'):	then else 
+FOLLOW(T):	+ then else 
+--------------------------------
+
+nullable(S):	false
+nullable(E):	false
+
+FIRST(S):	id 
+FIRST(E):	id 
+
+FOLLOW(S):	
+FOLLOW(E):	$ ) + 
+--------------------------------
+

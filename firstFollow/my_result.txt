@@ -1,0 +1,16 @@
+nullable(X)
+nullable(Y)
+-------------------
+nullable(T')
+nullable(E')
+-------------------
+nullable(T')
+nullable(E')
+nullable(L')
+-------------------
+-------------------
+nullable(E')
+nullable(X)
+-------------------
+-------------------
+
