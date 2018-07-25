@@ -14,6 +14,8 @@ exception No_such_symbol of string
 
 exception SymErr of string
 
+(* 一番最初の記号表
+   何も登録されていないので例外を返す *)
 let initTable x = raise (No_such_symbol x)
 
 (*

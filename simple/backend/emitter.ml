@@ -158,15 +158,14 @@ and trans_stmt ast nest tenv env =
   | Block (decLst, stmtLst) ->
       (* 
        * ブロック内で宣言された型や変数の処理
-       * 返り値は更新した型記号表tenv' と 値記号表env' と 割り当て済みオフセット addr'
-       *)
+       * 返り値は更新した型記号表tenv' と 値記号表env' と 割り当て済みオフセット addr' *)
       let tenv', env', addr' = type_decs decLst nest tenv env in
       (* 更新した記号表を元に関数定義部のコードを生成する *)
       List.iter (fun d -> trans_dec d nest tenv' env') decLst ;
       (*
        * ブロック内で定義された局所変数の割付けを行うため, スタックフレームをその分だけ拡張する
-       * 割り当て済みオフセットが addr' で求まっているので, 16byteアライメントを考慮して以下のようになる
-       *)
+       * スタックフレームの拡張とは, スタックポインタのアドレスを減算すること
+       * 割り当て済みオフセットが addr' で求まっているので, 16byteアライメントを考慮して以下のようになる *)
       let ex_frame = sprintf "\tsubq $%d, %%rsp\n" ((-addr' + 16) / 16 * 16) in
       (* 本体（文列）のコード生成 *)
       let code =
@@ -318,7 +317,10 @@ and trans_cond ast nest env =
     end
   | _ -> raise (Err "internal error")
 
-(* プログラム全体の生成 *)
+(*
+ * プログラム全体の生成の起点
+ * プログラムは main関数として呼び出せるようにする
+ *)
 let trans_prog ast =
   let code = trans_stmt ast 0 initTable initTable in
   io ^ header ^ code ^ epilogue ^ !output

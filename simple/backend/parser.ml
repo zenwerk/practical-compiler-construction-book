@@ -540,7 +540,7 @@ let yyact = [|
     let _1 = (Parsing.peek_val __caml_parser_env 0 : 'expr) in
     Obj.repr(
 # 81 "parser.mly"
-                           ( [_1] )
+                          ( [_1] )
 # 545 "parser.ml"
                : 'aargs))
 ; (fun __caml_parser_env ->

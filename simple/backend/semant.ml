@@ -23,7 +23,8 @@ let actual_ty typ =
           (* 型式の循環定義を禁止する *)
           if List.mem actty lst then raise (TypeErr "cyclic type definition")
           else travTy actty (actty :: lst)
-      | None -> raise (TypeErr "no actual type") end
+      | None -> raise (TypeErr "no actual type")
+      end
     | _ -> typ'
   in
   travTy typ [typ]
@@ -57,7 +58,7 @@ let rec create_ty ast tenv =
   | IntTyp -> INT
   | VoidTyp -> UNIT
 
-(* 実引数は，%rbp から +24 のところにある．*)
+(* 実引数は %rbp(フレームポインタ) から +24 のところにある．*)
 let savedARG = 24
 
 (* return address, static link, old %rbp *)
@@ -74,18 +75,17 @@ let savedARG = 24
  *  3. env  -> 値記号表
  *)
 
-(*
- * 宣言の処理
- * 変数の宣言はブロック {} の先頭でのみ行える
- * addr は割当済みのメモリオフセット
- *)
-let rec type_dec ast (nest, addr) tenv env = (* 個々の宣言の処理; type_desc から呼ばれる *)
+ (*
+  * 個々の宣言の処理; type_desc から呼ばれる 
+  * 返り値は (tenv:型記号表, env:値記号表, addr:割当済みのメモリオフセット)
+  *)
+let rec type_dec ast (nest, addr) tenv env =
   match ast with
   (* 関数定義の処理 *) 
   | FuncDec (func_name, args, rlt, Block (dl, _)) -> (* 関数名の記号表への登録 *)
       (* 仮引数と関数内の局所変数の多重宣言はできないのでチェック *)
       check_redecl (List.map (fun (typ, s) -> VarDec (typ, s)) args @ dl) [] [] ;
-      let env' =
+      let env' = (* 関数名で値記号表を更新する *)
         update func_name
           (FunEntry
              { formals= List.map (fun (typ, _) -> create_ty typ tenv) args
@@ -97,7 +97,7 @@ let rec type_dec ast (nest, addr) tenv env = (* 個々の宣言の処理; type_d
   (* 変数宣言の処理 *)
   | VarDec (typ, symbol) ->
       ( tenv
-      , update symbol
+      , update symbol (* 変数名で値記号表を更新する *)
           (VarEntry {ty= create_ty typ tenv; offset= addr - 8; level= nest})
           env
       , addr - 8 )
@@ -115,11 +115,12 @@ and type_decs decl nest tenv env = (* 宣言リストの処理 *)
 
 (* 
  * 関数の仮引数宣言のリストの処理: emitter.ml で使われる
- * 仮引数の値記号表への登録を行う
+ * 関数の仮引数の値記号表への登録を行う
  *)
 and type_param_dec args nest tenv env = 
   let env', _ =
     List.fold_left begin
+        (* 第1引数はアキュムレータ(acc), 第2引数は args の要素 *)
         fun (env, addr) (ty, symbol) -> ( update symbol (VarEntry {offset= addr; level= nest; ty= create_ty ty tenv}) env , addr + 8 )
       end
       (env, savedARG) (* 初期値 *)
