@@ -304,7 +304,7 @@ and trans_cond ast nest env =
         (* cmp命令 *)
         ^ "\tcmpq %rax, %rbx\n"
       in
-      let l = incLabel () in (* ラベルを一意に採番 *)
+      let l = incLabel () in (* ラベル番号を一意に採番 *)
       match op with
       (* 条件と分岐の関係は，逆 *)
       | "==" -> (code ^ sprintf "\tjne L%d\n" l, l)

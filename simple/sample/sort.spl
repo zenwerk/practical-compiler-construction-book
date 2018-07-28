@@ -1,0 +1,58 @@
+{
+       int[10] a;
+       int size;
+
+       void init() {
+          int i;
+
+          i = 0;
+          while (i < size) {
+              a[i] = size - i;
+              i = i+1;
+          }
+       }
+
+       void print() {
+          int i;
+ 
+          i = 0;
+          while (i < size) {
+              iprint(a[i]);
+              sprint(" ");
+              i = i+1;
+          }
+          sprint("\n");
+       }
+
+       void sort(int i) {
+          void min (int j) {
+              void swap(int i, int j) {
+                  int tmp;
+
+                  tmp = a[i];
+                  a[i] = a[j];
+                  a[j] = tmp;
+              }
+
+
+              if (j < size) {
+                   if (a[j] < a[i]) swap(i,j);
+                   min (j+1);
+             }
+          }
+
+          if (i < size) {
+                  min(i+1);
+                  sort(i+1);
+          }
+     }
+
+     size = 10;
+     new(a);
+     init();
+     sprint("before sorting\n");
+     print();
+     sort(0);
+     sprint("after sorting\n");
+     print();
+}
