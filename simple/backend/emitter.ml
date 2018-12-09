@@ -14,8 +14,8 @@ let incLabel () =
 (* str を n 回コピーする *)
 let rec nCopyStr n str = if n > 0 then str ^ nCopyStr (pred n) str else ""
 
-(* 
- * 呼出し時にcallee(呼び出され側)に静的リンクを渡すコードを生成する関数 
+(*
+ * 呼出し時にcallee(呼び出され側)に静的リンクを渡すコードを生成する関数
  * srcNestLevel -> 呼び出し側の入れ子レベル
  * dstDestLevel -> 呼び出され側の入れ子レベル
  *)
@@ -66,10 +66,9 @@ let rec trans_dec ast nest tenv env =
       (* 関数コードの合成 *)
       output :=
         !output ^ fname ^ ":\n" (* 関数ラベル *)
-        ^ prologue (* プロローグ *)
-        ^ code (* 本体コード *)
-        ^ epilogue
-  (* エピローグ *)
+        ^ prologue              (* プロローグ *)
+        ^ code                  (* 本体コード *)
+        ^ epilogue              (* エピローグ *)
   (* 変数宣言の処理 *)
   | VarDec (ty, symbol) -> ()
   (* 型宣言の処理 *)
@@ -80,7 +79,7 @@ let rec trans_dec ast nest tenv env =
       | _ -> raise (Err symbol)
 
 (* 
- * 文の処理 
+ * 文の処理
  * 文は結果を持たない.
  * 文の主な振る舞いは、変数の代入、特殊文、手続き呼出し、制御構造の導入
  *)
@@ -89,44 +88,44 @@ and trans_stmt ast nest tenv env =
   match ast with
   (* 代入のコード: 代入先フレームをsetVarで求める. *)
   | Assign (v, e) ->
-      trans_exp e nest env   (* 右辺の式の結果がフレームトップに保存される *)
-      ^ trans_var v nest env (* 変数vのアドレスを rax レジスタに読み込む *)
-      ^ "\tpopq (%rax)\n"    (* (フレームトップに保存されている)式の結果を rax の指すアドレスに保存する *)
+      trans_exp e nest env                      (* 右辺の式の結果がフレームトップに保存される *)
+      ^ trans_var v nest env                    (* 変数vのアドレスを rax レジスタに読み込む *)
+      ^ "\tpopq (%rax)\n"                       (* (フレームトップに保存されている)式の結果を rax の指すアドレスに保存する *)
   (* iprintのコード: 整数の印字 *)
   | CallProc ("iprint", [arg]) ->
-      trans_exp arg nest env      (* 式の結果がフレームトップに保存される *)
-      ^ "\tpopq  %rsi\n"          (* 第2引数用レジスタ rsi に式の結果を読み込む (cygwin では rdx) *)
-      ^ "\tleaq IO(%rip), %rdi\n" (* IOラベルを第1引数用レジスタ rdi に格納する (cygwin では rcx) *)
-      ^ "\tmovq $0, %rax\n"       (* rax を即値0 で上書き (Cygwinでは不要) *)
-      ^ "\tcallq _printf\n"       (* Cのprintfを呼び出す (linux では printf) *)
+      trans_exp arg nest env                    (* 式の結果がフレームトップに保存される *)
+      ^ "\tpopq  %rsi\n"                        (* 第2引数用レジスタ rsi に式の結果を読み込む (cygwin では rdx) *)
+      ^ "\tleaq IO(%rip), %rdi\n"               (* IOラベルを第1引数用レジスタ rdi に格納する (cygwin では rcx) *)
+      ^ "\tmovq $0, %rax\n"                     (* rax を即値0 で上書き (Cygwinでは不要) *)
+      ^ "\tcallq _printf\n"                     (* Cのprintfを呼び出す (linux では printf) *)
   (* sprintのコード: 文字列の印字 *)
   | CallProc ("sprint", [StrExp s]) ->
       let l = incLabel () in
-      "\t.data\n"                              (* データ定義開始 *)
-      ^ sprintf "L%d:\t.string %s\n" l s       (* 文字列データをラベル Ln で定義する *)
-      ^ "\t.text\n"                            (* コード部 *)
-      ^ sprintf "\tleaq L%d(%%rip), %%rdi\n" l (* ラベル Ln のデータを第1引数レジスタへ (cygwinでは rcx ) *)
-      ^ "\tmovq $0, %rax\n"                    (* cygwin では不要 *)
-      ^ "\tcallq _printf\n"                    (* printf の呼出し (linux では printf) *)
+      "\t.data\n"                               (* データ定義開始 *)
+      ^ sprintf "L%d:\t.string %s\n" l s        (* 文字列データをラベル Ln で定義する *)
+      ^ "\t.text\n"                             (* コード部 *)
+      ^ sprintf "\tleaq L%d(%%rip), %%rdi\n" l  (* ラベル Ln のデータを第1引数レジスタへ (cygwinでは rcx ) *)
+      ^ "\tmovq $0, %rax\n"                     (* cygwin では不要 *)
+      ^ "\tcallq _printf\n"                     (* printf の呼出し (linux では printf) *)
   (* scanのコード: 整数の入力 *)
   | CallProc ("scan", [VarExp v]) ->
-      trans_var v nest env        (* 変数vのアドレスを取得 *)
-      ^ "\tmovq %rax, %rsi\n"     (* 左辺値の結果を第2引数レジスタへ (cygwin では rdx) *)
-      ^ "\tleaq IO(%rip), %rdi\n" (* IOラベルのアドレスを第1引数レジスタへ (cygwinではrcx) *)
-      ^ "\tmovq $0, %rax\n"       (* cygwin では不要 *)
-      ^ "\tcallq _scanf\n"        (* C の scanf 呼出し (linux では scanf) *)
+      trans_var v nest env                      (* 変数vのアドレスを取得 *)
+      ^ "\tmovq %rax, %rsi\n"                   (* 左辺値の結果を第2引数レジスタへ (cygwin では rdx) *)
+      ^ "\tleaq IO(%rip), %rdi\n"               (* IOラベルのアドレスを第1引数レジスタへ (cygwinではrcx) *)
+      ^ "\tmovq $0, %rax\n"                     (* cygwin では不要 *)
+      ^ "\tcallq _scanf\n"                      (* C の scanf 呼出し (linux では scanf) *)
   (* returnのコード *)
   | CallProc ("return", [arg]) ->
-      trans_exp arg nest env      (* 式の結果をスタックに push *)
-      ^ "\tpopq %rax\n"           (* 結果を再度 pop して rax レジスタへ読み込む *)
+      trans_exp arg nest env                    (* 式の結果をスタックに push *)
+      ^ "\tpopq %rax\n"                         (* 結果を再度 pop して rax レジスタへ読み込む *)
   (* 配列の領域確保: ヒープ領域の取得 *)
   | CallProc ("new", [VarExp v]) ->
       let size = calc_size (type_var v env) in
-      sprintf "\tmovq $%d, %%rdi\n" size (* 配列のサイズを第1引数レジスタへ *)
-      ^ "\tcallq _malloc\n"              (* C の malloc を呼び出す *)
-      ^ "\tpushq %rax\n"                 (* malloc 結果をスタックに push *)
-      ^ trans_var v nest env             (* new の引数に渡された変数vのアドレスを取得 *)
-      ^ "\tpopq (%rax)\n"                (* malloc の結果を変数v へ pop する *)
+      sprintf "\tmovq $%d, %%rdi\n" size        (* 配列のサイズを第1引数レジスタへ *)
+      ^ "\tcallq _malloc\n"                     (* C の malloc を呼び出す *)
+      ^ "\tpushq %rax\n"                        (* malloc 結果をスタックに push *)
+      ^ trans_var v nest env                    (* new の引数に渡された変数vのアドレスを取得 *)
+      ^ "\tpopq (%rax)\n"                       (* malloc の結果を変数v へ pop する *)
   (* 
    * 手続き呼出しのコード 
    * 実引数のコード、静的リンクのコード、callq で構成される
@@ -146,8 +145,8 @@ and trans_stmt ast nest tenv env =
           ^ passLink nest level
           (* 手続き s の呼出しコード *)
           ^ "\tcallq " ^ s ^ "\n"
-          (* 
-           * スタックに積んだ引数+静的リンクを降ろして元に戻す 
+          (*
+           * スタックに積んだ引数+静的リンクを降ろして元に戻す
            * スタックポインタに加算 -> アドレスを増やしてスタックポインタを巻き戻している
            * 加算するアドレスの計算は, 16byteアライメントの仕様を考慮して以下
            * (len(実引数リスト) + 1(静的リンク) + 1(アライメント分？) / 2) * 16byte
@@ -174,16 +173,16 @@ and trans_stmt ast nest tenv env =
           "" stmtLst
       in
       ex_frame ^ code  (* 局所変数分のフレーム拡張の付加 *)
-  (* 
+  (*
    * elseなしif文(if (cond) stmt)のコード生成
    *)
   | If (e, s, None) ->
       let condCode, l = trans_cond e nest env in
-      condCode                      (* 条件分岐のコード *)
-      ^ trans_stmt s nest tenv env  (* 条件が真のとき実行される文のコード *)
-      ^ sprintf "L%d:\n" l          (* 条件が偽のときのジャンプ先ラベル *)
-  (* 
-   * elseありif文(if (cond) stmt1 else stmt2)のコード生成 
+      condCode                       (* 条件分岐のコード *)
+      ^ trans_stmt s nest tenv env   (* 条件が真のとき実行される文のコード *)
+      ^ sprintf "L%d:\n" l           (* 条件が偽のときのジャンプ先ラベル *)
+  (*
+   * elseありif文(if (cond) stmt1 else stmt2)のコード生成
    *)
   | If (e, s1, Some s2) ->
       let condCode, l1 = trans_cond e nest env in
@@ -194,17 +193,17 @@ and trans_stmt ast nest tenv env =
       ^ sprintf "L%d:\n" l1          (* 条件が偽のときのジャンプ先ラベル *)
       ^ trans_stmt s2 nest tenv env  (* 条件が偽のとき実行される文のコード *)
       ^ sprintf "L%d:\n" l2
-  (* 
+  (*
    * while文(while (cond) stmt)のコード生成
    *)
   | While (e, s) ->
       let condCode, l1 = trans_cond e nest env in
       let l2 = incLabel () in
-      sprintf "L%d:\n" l2    (* whileの先頭ラベル *)
-      ^ condCode                    (* 条件分岐のコード *)
-      ^ trans_stmt s nest tenv env  (* 条件が真のときに実行される文のコード *)
-      ^ sprintf "\tjmp L%d\n" l2    (* while の先頭に戻る *)
-      ^ sprintf "L%d:\n" l1  (* ループの脱出先ラベル *)
+      sprintf "L%d:\n" l2            (* whileの先頭ラベル *)
+      ^ condCode                     (* 条件分岐のコード *)
+      ^ trans_stmt s nest tenv env   (* 条件が真のときに実行される文のコード *)
+      ^ sprintf "\tjmp L%d\n" l2     (* while の先頭に戻る *)
+      ^ sprintf "L%d:\n" l1          (* ループの脱出先ラベル *)
   (* 空文 *)
   | NilStmt -> ""
 
@@ -221,7 +220,7 @@ and trans_var ast nest env =
           "\tmovq %rbp, %rax\n" (* rax にフレームポインタの値を格納 *)
           (* 言語仕様より,16(rbp)は静的リンクの値を指す, それをraxに上書きするコードを nest-level 回数繰り返す.
              -> つまり改装分静的リンクをたどり、ネスト分フレームを移動する *)
-          ^ nCopyStr (nest - level) "\tmovq 16(%rax), %rax\n" 
+          ^ nCopyStr (nest - level) "\tmovq 16(%rax), %rax\n"
           (* 得られたフレーム(rax)からoffset分先に格納されているアドレス(rax+offset)を rax に格納 *)
           ^ sprintf "\tleaq %d(%%rax), %%rax\n" offset
       | _ -> raise (No_such_symbol s) )
@@ -232,24 +231,24 @@ and trans_var ast nest env =
       ^ "\tpopq %rbx\n"              (* スタックポインタの値をレジスタrbxにポップする *)
       ^ "\tleaq (%rax,%rbx), %rax\n" (* 最初のオフセットと配列先頭アドレスを足したアドレスをraxに保存する *)
 
-(* 
- * 式の処理 
+(*
+ * 式の処理
  * trans_exp でのASTの処理結果は rax の値をフレームに push して終わる
  *)
 and trans_exp ast nest env =
   match ast with
-  (* 
+  (*
    * 整数定数のコード
    * スタックに即値をプッシュすればよい
    *)
   | IntExp i -> sprintf "\tpushq $%d\n" i
-  (* 
-   * 変数参照のコード：reVarで参照フレームを求める 
+  (*
+   * 変数参照のコード：reVarで参照フレームを求める
    * trans_var で左辺値vのアドレスを %rax に入れて返す
    * (%rax)でアドレスの指す値を取り出し、スタックにプッシュする
    *)
   | VarExp v ->
-      trans_var v nest env 
+      trans_var v nest env
       ^ "\tmovq (%rax), %rax\n"
       ^ "\tpushq %rax\n"
   (* +のコード *)
@@ -259,37 +258,37 @@ and trans_exp ast nest env =
       ^ "\taddq %rax, (%rsp)\n" (* rax(right)とスタック(left)を加算する *)
   (* -のコード *)
   | CallFunc ("-", [left; right]) ->
-      trans_exp left nest env 
-      ^ trans_exp right nest env 
+      trans_exp left nest env
+      ^ trans_exp right nest env
       ^ "\tpopq %rax\n"
       ^ "\tsubq %rax, (%rsp)\n"
   (* *のコード *)
   | CallFunc ("*", [left; right]) ->
-      trans_exp left nest env 
-      ^ trans_exp right nest env 
+      trans_exp left nest env
+      ^ trans_exp right nest env
       ^ "\tpopq %rax\n"
       ^ "\timulq (%rsp), %rax\n" (* 乗算命令 *)
       ^ "\tmovq %rax, (%rsp)\n"
   (* /のコード *)
   | CallFunc ("/", [left; right]) ->
-      trans_exp left nest env 
-      ^ trans_exp right nest env 
+      trans_exp left nest env
+      ^ trans_exp right nest env
       ^ "\tpopq %rbx\n"  (* 割る数 *)
       ^ "\tpopq %rax\n"  (* 割られる数 *)
       ^ "\tcqto\n"       (* rdx は使用しないので rax を符号拡張する *)
       ^ "\tidivq %rbx\n" (* raxに商, rdxに余りが格納される *)
       ^ "\tpushq %rax\n" (* rax に格納された結果をスタックに push *)
   (* 符号反転のコード *)
-  | CallFunc ("!", arg :: _) -> 
-      trans_exp arg nest env 
+  | CallFunc ("!", arg :: _) ->
+      trans_exp arg nest env
       ^ "\tnegq (%rsp)\n"
   (* 関数呼出しのコード *)
   | CallFunc (s, el) ->
       trans_stmt (CallProc (s, el)) nest initTable env (* 返戻値は%raxに入れて返す *)
-      ^ "\tpushq %rax\n" (* 関数呼出しの結果をスタックに push *)
+      ^ "\tpushq %rax\n"                               (* 関数呼出しの結果をスタックに push *)
   | _ -> raise (Err "internal error")
 
-(* 
+(*
  * 関係演算の処理
  * 関係演算のアセンブリコードと比較演算部分のラベル場号を返す
  *)

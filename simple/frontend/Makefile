@@ -1,4 +1,4 @@
-FILE = parser.mly lexer.mll ast.ml  
+FILE = parser.mly lexer.mll ast.ml
 
 print_ast: $(FILE) print_ast
 	ocamlyacc parser.mly
@@ -12,4 +12,3 @@ print_ast: $(FILE) print_ast
 
 clean:
 	rm  -f *.cmi *.cmo parser.ml lexer.ml parser.mli print_ast
-

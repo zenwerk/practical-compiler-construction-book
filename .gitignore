@@ -3,4 +3,9 @@ _build/
 *.cmi
 *.cma
 *.cmx
+*.cmt
+*.cmti
 *.cmxa
+
+node_modules/
+simple/backend/simc

@@ -25,9 +25,9 @@ let rec trans_stmt ast env =
                       trans_stmt s2 env'
   | Assign (var, e) -> let value = trans_exp e env in
                        update var value env
-  | Print e -> let value = trans_exp e env in                     
+  | Print e -> let value = trans_exp e env in
                (print_int value; print_string "\n"; env)
-(* 式の解析 *)               
+(* 式の解析 *)
 and trans_exp ast env =
   match ast with
   | ID v -> env v
@@ -37,13 +37,13 @@ and trans_exp ast env =
                      value1 + value2
   | Minus (e1, e2) -> let value1 = trans_exp e1 env in
                       let value2 = trans_exp e2 env in
-                      value1 - value2                   
+                      value1 - value2
   | Times (e1, e2) -> let value1 = trans_exp e1 env in
                       let value2 = trans_exp e2 env in
-                      value1 * value2                   
+                      value1 * value2
   | Div (e1, e2) -> let value1 = trans_exp e1 env in
                     let value2 = trans_exp e2 env in
-                    value1 / value2                   
+                    value1 / value2
 
 (** AST を手打ち *)
 let prog = Stmts (Assign ("x", Plus (Num 1, Times (Num 2, Num 3))),

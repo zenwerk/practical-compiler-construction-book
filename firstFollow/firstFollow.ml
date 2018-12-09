@@ -82,17 +82,17 @@ let firstFollow rules =
   let terms =  (* 終端記号 *)
     List.filter (fun x -> not (List.mem x nonTerms)) (extSym rules)
   in
-  let symbols = nonTerms @ terms in         (* 全部の記号 *)
-  let symbolNum = List.length symbols in    (* 記号の数 *)
-  let nonTermsNum = List.length nonTerms in (* 非終端記号の数 *)
-  let ruleNum = List.length rules in        (* 生成規則の数 *)
+  let symbols = nonTerms @ terms in             (* 全部の記号 *)
+  let symbolNum = List.length symbols in        (* 記号の数 *)
+  let nonTermsNum = List.length nonTerms in     (* 非終端記号の数 *)
+  let ruleNum = List.length rules in            (* 生成規則の数 *)
 
   let aRules = Array.of_list (List.map (fun x -> Array.of_list x) rules) in (* Rules を 'a Array Array に変換する *)
 
-  let aSymbols = Array.of_list symbols in      (* symbols を Array にする *)
-  let nullable = Array.make symbolNum false in (* 空導出可能な記号を保存するための Array を準備する *)
-  let first = Array.make symbolNum [] in       (* FIRST集合を保存するための Array を準備する *)
-  let follow = Array.make symbolNum [] in      (* FOLLOW集合を保存するための Array を準備する *)
+  let aSymbols = Array.of_list symbols in       (* symbols を Array にする *)
+  let nullable = Array.make symbolNum false in  (* 空導出可能な記号を保存するための Array を準備する *)
+  let first = Array.make symbolNum [] in        (* FIRST集合を保存するための Array を準備する *)
+  let follow = Array.make symbolNum [] in       (* FOLLOW集合を保存するための Array を準備する *)
 
   (** initializeFirstTable はすべての非終端記号をリストに入れて, FIRST集合の配列につっこむ *)
   let initializeFirstTable () =
@@ -126,7 +126,7 @@ let firstFollow rules =
       (*
        * Nullable の更新
        *)
-      if (* 生成規則が 'X ->' のような場合(空導出する) or 生成規則の右辺が全て nullable の場合 *)
+      if   (* 生成規則が 'X ->' のような場合(空導出する) or 生成規則の右辺が全て nullable の場合 *)
         ruleLength = 1 || List.for_all isNullable (List.tl (Array.to_list rule))  (* 生成規則の右辺をリスト化 *)
       then (* 生成規則の左辺をnullbaleフラグを立てる *)
         nullable.(s2i rule.(0)) <- true ;
@@ -135,13 +135,13 @@ let firstFollow rules =
       (* FIRST, FOLLOW に変化があるか確認する処理開始 *)
       if ruleLength > 1 then (* 空導出じゃない生成規則なら *)
         for i = 1 to ruleLength - 1 do (* 生成規則の右辺で回す *)
-          (* 
-           * FIRST集合の更新 
+          (*
+           * FIRST集合の更新
            *)
           if (* 最初のループ? or 生成規則を頭からループ箇所まで順にnullableか確認する *)
             i = 1 || List.for_all isNullable (subList rule 1 (i - 1))
           then (* FIRST(生成規則の左辺) <- FIRST(生成規則の左辺) @ FIRST(生成規則の右辺[i]) *)
-            (* 最初のループ(i=1)のときに, 必ず以下が実行される *)
+               (* 最初のループ(i=1)のときに, 必ず以下が実行される *)
             first.(s2i rule.(0)) <- re (first.(s2i rule.(0)) @ first.(s2i rule.(i))) ;
 
           (*

@@ -14,7 +14,7 @@
 
        void print() {
           int i;
- 
+
           i = 0;
           while (i < size) {
               iprint(a[i]);
